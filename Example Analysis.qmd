@@ -1,0 +1,182 @@
+---
+title: "Example Analysis"
+---
+![Baltimore weather](image/image2.jpeg)
+
+## Research Question
+
+In investigating whether particulate air pollution levels as measured by TSP are associated with mortality, it is important to control for seasonal variations that might reflect the effects of weather on mortality, rather than particulate pollution levels.
+
+In this project, I will use daily data from the city of Baltimore for the period 1987-2005, including the mortality count, median PM10 level, and season, to investigate whether or not particulate air pollution is associated with mortality, having controlled for seasonal effects.
+
+## Intended Audience
+
+Students who are studying statistical methods and environmental health.
+
+## Data Analysis
+
+### Data Source
+
+This data comes from the [National Morbidity and Mortality Air Pollution Study](https://www.healtheffects.org/publication/national-morbidity-mortality-and-air-pollution-study-part-iii-concentration-response) (NMMAPS) which looked at the relationship between pollution and health outcomes for 100 U.S. cities.
+
+### Data Dictionary
+
+| Name   | Description                     | Coding                                      |
+|-----------------|---------------------------|----------------------------|
+| date   | Calender date                   | Date written in year, month, day            |
+| deaths | Number of non-accidental deaths | Discrete                                    |
+| PM10   | Particulate pollution level     | Continuous                                  |
+| temp   | Temperature (Fahrenheit)        | Continuous                                  |
+| season | Season of the year              | 1 = Winter 2 = Spring 3 = Summer 4 = Autumn |
+
+: Table: Data Dictionary
+
+### Data Analysis
+
+1. Stratify the daily mortality data into 4 groups by season.
+
+<details>
+  <summary>Click to show or hide code</summary>
+```{r}
+library(tidyverse)
+balt621 <- read_csv("balt621.csv")
+balt621 %>% 
+  group_by(season) %>% 
+  summarize(n_pm10 = sum(!is.na(pm10)), mean_pm10 = mean(pm10, na.rm=TRUE),                 n_mortality = sum(!is.na(death)), mean_mortality = mean(death))
+```
+#
+| season | n_pm10 | mean_pm10 | n_mortality | mean_mortality |
+|--------|--------|-----------|-------------|----------------|
+| Autumn | 559    | -2.97     |    1748     |      19.2      |
+| Spring | 563    | 0.740     |    1729     |      18.2      |
+| Summer | 571    | 4.58      |    1748     |      17.7      |
+| Winter | 551    | -2.93     |    1715     |      20.8      |
+
+Looking at the summaries by season, we can see that mean daily mortality varies across the seasons – the lowest average daily mortality is in summer (17.7 deaths per day), followed by spring (18.2 deaths day), autumn (19.2 deaths per day), and winter (20.8 deaths per day). There is a reverse trend in PM10 levels: summer has the highest mean PM10 level (4.6), followed by spring (0.7), and autumn and winter (-3.0 for each). 
+
+The PM10 variable has been standardized so that values greater than 0 represent “above average” pollution days and values less that 0 represent “below average” pollution days. So summer tends to have pollution levels that are above average while autumn and winter have pollution levels that are below average.
+
+::: {.callout-tip collapse="false"}
+
+We also see that there is a lot of missing data for the PM10 variable. We see this because in winter, for example, there are 1,715 observations for death, but only 551 for pm10. There are only PM10 levels for about 30% of the days in the dataset.
+
+The good news is that we see similar trends for death by season if we restrict to just the death data where we have PM10 data as well. We see that summer has the lowest average daily death rate, followed by spring, autumn, and winter. This means there’s nothing “unusual” about the days where we have missing PM10 data, so it’s to base our analysis only on the days where we have PM10 data.
+:::
+<details>
+  <summary>Click to show or hide code</summary>
+```{r}
+balt621 %>%
+  filter(!is.na(pm10)) %>%
+  group_by(season) %>%
+  summarize(n_pm10 = sum(!is.na(pm10)), mean_pm10 = mean(pm10, na.rm=TRUE), 
+            n_mortality = sum(!is.na(death)), mean_mortality = mean(death))
+```
+#
+2. For each of the four seasonal strata, stratify the days into 5 pollution (pm10) strata and calculate the mean mortality in the lowest and highest of the five pollution strata separately for four seasonal strata. 
+
+<details>
+  <summary>Click to show or hide code</summary>
+```{r}
+pm10winter <- filter(balt621, season=="Winter") 
+quintiles = quantile(pm10winter$pm10, c(0,.2,.4,.6,.8,1), na.rm=TRUE) 
+pm10winter$pm_group = cut(pm10winter$pm10, breaks=quintiles, labels=1:5) 
+table(pm10winter$pm_group)
+```
+
+```{r}
+pm10spring <- filter(balt621, season=="Spring") 
+quintiles = quantile(pm10spring$pm10, c(0,.2,.4,.6,.8,1), na.rm=TRUE) 
+pm10spring$pm_group = cut(pm10spring$pm10, breaks=quintiles, labels=1:5) 
+table(pm10spring$pm_group)
+```
+
+```{r}
+pm10summer <- filter(balt621, season=="Summer") 
+quintiles = quantile(pm10summer$pm10, c(0,.2,.4,.6,.8,1), na.rm=TRUE) 
+pm10summer$pm_group = cut(pm10summer$pm10, breaks=quintiles, labels=1:5) 
+table(pm10summer$pm_group)
+```
+
+```{r}
+pm10autumn <- filter(balt621, season=="Autumn") 
+quintiles = quantile(pm10autumn$pm10, c(0,.2,.4,.6,.8,1), na.rm=TRUE) 
+pm10autumn$pm_group = cut(pm10autumn$pm10, breaks=quintiles, labels=1:5) 
+table(pm10autumn$pm_group)
+```
+#
+  In winter, the mean daily mortality is HIGHER on the low pollution days (22.2 vs. 21.4 deaths.) 
+
+  In spring, the mean daily mortality is LOWER on the low pollution days (18.6 vs. 19.0 deaths.) 
+
+  In summer, the mean daily mortality is LOWER on the low pollution days (17.7 vs. 19.9 deaths.) 
+
+  In autumn, the mean daily mortality is LOWER on the low pollution days (19.8 vs. 20.6 deaths.)
+
+<details>
+  <summary>Click to show or hide code</summary>
+```{r}
+pm10winter %>% filter(pm_group==1) %>% 
+ summarize(mean=mean(death), sd=sd(death), n=n())
+pm10winter %>% filter(pm_group==5) %>% 
+ summarize(mean=mean(death), sd=sd(death), n=n())
+
+pm10spring %>% filter(pm_group==1) %>% 
+ summarize(mean=mean(death), sd=sd(death), n=n())
+pm10spring %>% filter(pm_group==5) %>% 
+ summarize(mean=mean(death), sd=sd(death), n=n())
+
+pm10summer %>% filter(pm_group==1) %>% 
+ summarize(mean=mean(death), sd=sd(death), n=n())
+pm10summer %>% filter(pm_group==5) %>% 
+ summarize(mean=mean(death), sd=sd(death), n=n())
+
+pm10autumn %>% filter(pm_group==1) %>% 
+ summarize(mean=mean(death), sd=sd(death), n=n())
+pm10autumn %>% filter(pm_group==5) %>% 
+ summarize(mean=mean(death), sd=sd(death), n=n())
+```
+#
+3. Within each seasonal stratum, test the null hypothesis that the mean mortality is the same regardless of the pollution level by comparing the mean mortality in the lowest and highest pollution strata.
+
+::: {.callout-note collapse="true"}
+Given the large sample sizes, there is no need to pool the variances.
+::: 
+For all strata except summer, there is little indication of a difference in mean daily mortality between the lowest and highest pollution strata (p=0.22 for winter, p=0.48 for spring, p=0.33 for autumn). In summer, a difference in mean daily mortality between the lowest and highest pollution strata is strongly indicated (p=0.0006).
+
+<details>
+  <summary>Click to show or hide code</summary>
+```{r}
+pm10winter.15 = pm10winter %>% filter(pm_group==1 | pm_group==5)
+t.test(death ~ pm_group, data=pm10winter.15, var.equal=FALSE)
+
+pm10spring.15 = pm10spring %>% filter(pm_group==1 | pm_group==5)
+t.test(death ~ pm_group, data=pm10spring.15, var.equal=FALSE)
+
+pm10summer.15 = pm10summer %>% filter(pm_group==1 | pm_group==5)
+t.test(death ~ pm_group, data=pm10summer.15, var.equal=FALSE)
+
+pm10autumn.15 = pm10autumn %>% filter(pm_group==1 | pm_group==5)
+t.test(death ~ pm_group, data=pm10autumn.15, var.equal=FALSE)
+```
+#
+### Conclusion
+
+Data on Baltimore air pollution over a 19-year period were analyzed. The number of deaths that occurred on each day were recorded along with the level in the air of particulate matter of less than 10 micrometers in diameter (PM10 level). The average number of deaths between the lowest and highest quintile of PM10 level were compared across seasons (winter, spring, summer, autumn). 
+
+For all strata except summer, there is little indication of a difference in mean daily mortality between the lowest and highest pollution strata (p=0.22 for winter, p=0.48 for spring, p=0.33 for autumn). In summer, a difference in mean daily mortality between the lowest and highest pollution strata is strongly indicated (p=0.0006).
+
+Although these data provide no evidence that the mean mortality differs by extreme pollution levels in winter, spring, and autumn for cities such as Baltimore, in the summer there appears to be strong evidence of a difference in the mean mortality for extreme pollution levels. In particular, there are an estimated 2.3 more deaths in the highest as compared to the lowest PM10 groups in summer.
+
+### Functions used
+
+dyplr: filter, group_by, summarize, mean, ungroup
+
+ggplot2: I am sorry I failed to make any plots. I've tried my best……😢
+
+## Referneces
+
+1. Peng RD, Dominici F, Paster-Barriuso R, Zeger SL, Samet JM: Seasonal analysis of air pollution and mortality in 100 U.S. cities. American Journal of Epidemiology 16(6): 585-594, 2005.
+
+2. Dominici F, McDermott A, Daniels M, Zeger SL, Samet JM. Revised analyses of the National Morbidity, Mortality, and Air Pollution Study: mortality among residents of 90 cities. J Toxicol Environ Health A. 2005 Jul 9-23;68(13-14):1071-92. doi: 10.1080/15287390590935932. PMID: 16024489.
+
+3. Izzotti A, Spatera P, Khalid Z, Pulliero A. Importance of Punctual Monitoring to Evaluate the Health Effects of Airborne Particulate Matter. Int J Environ Res Public Health. 2022 Aug 25;19(17):10587. doi: 10.3390/ijerph191710587. PMID: 36078301; PMCID: PMC9518414.

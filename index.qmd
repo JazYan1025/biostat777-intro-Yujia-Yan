@@ -1,0 +1,9 @@
+---
+title: "Yujia Yan"
+about:
+  template: jolla
+  image: image/2023-07-11 150716.jpg
+---
+
+
+I am a 1st year ScM student in the Department of Environmental Health and Engineering at Johns Hopkins University.
