@@ -1,0 +1,79 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About Me",
+    "section": "",
+    "text": "Johns Hopkins University, 2023 - Current\nMaster of Science in Environmental Health\nFudan University, 2018 - 2023\nBachelor of Medicine in Preventive Medicine"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Yujia Yan",
+    "section": "",
+    "text": "I am a 1st year ScM student in the Department of Environmental Health and Engineering at Johns Hopkins University."
+  },
+  {
+    "objectID": "about.html#experience",
+    "href": "about.html#experience",
+    "title": "About Me",
+    "section": "Experience",
+    "text": "Experience\n\nAnalyst Assitant | Industrial Securities\nIntern | Centers for Disease Control & Prevention in Shanghai\nResearch Assistant | Fudan University Department of Nutrition & Food Hygiene"
+  },
+  {
+    "objectID": "Example Analysis.html",
+    "href": "Example Analysis.html",
+    "title": "Example Analysis",
+    "section": "",
+    "text": "Baltimore weather"
+  },
+  {
+    "objectID": "Example Analysis.html#data-source",
+    "href": "Example Analysis.html#data-source",
+    "title": "Example Analysis",
+    "section": "Data Source",
+    "text": "Data Source\nThis data comes from the National Morbidity and Mortality Air Pollution Study (NMMAPS) which looked at the relationship between pollution and health outcomes for 100 U.S. cities."
+  },
+  {
+    "objectID": "Example Analysis.html#intended-audience",
+    "href": "Example Analysis.html#intended-audience",
+    "title": "Example Analysis",
+    "section": "Intended Audience",
+    "text": "Intended Audience\nStudents who are studying statistical methods and environmental health."
+  },
+  {
+    "objectID": "Example Analysis.html#data-dictionary",
+    "href": "Example Analysis.html#data-dictionary",
+    "title": "Example Analysis",
+    "section": "Data Dictionary",
+    "text": "Data Dictionary\n\nTable: Data Dictionary\n\n\n\n\n\n\n\nName\nDescription\nCoding\n\n\n\n\ndate\nCalender date\nDate written in year, month, day\n\n\ndeaths\nNumber of non-accidental deaths\nDiscrete\n\n\nPM10\nParticulate pollution level\nContinuous\n\n\ntemp\nTemperature (Fahrenheit)\nContinuous\n\n\nseason\nSeason of the year\n1 = Winter 2 = Spring 3 = Summer 4 = Autumn"
+  },
+  {
+    "objectID": "Example Analysis.html#data-analysis",
+    "href": "Example Analysis.html#data-analysis",
+    "title": "Example Analysis",
+    "section": "Data Analysis",
+    "text": "Data Analysis\n\nData Source\nThis data comes from the National Morbidity and Mortality Air Pollution Study (NMMAPS) which looked at the relationship between pollution and health outcomes for 100 U.S. cities.\n\n\nData Dictionary\n\nTable: Data Dictionary\n\n\n\n\n\n\n\nName\nDescription\nCoding\n\n\n\n\ndate\nCalender date\nDate written in year, month, day\n\n\ndeaths\nNumber of non-accidental deaths\nDiscrete\n\n\nPM10\nParticulate pollution level\nContinuous\n\n\ntemp\nTemperature (Fahrenheit)\nContinuous\n\n\nseason\nSeason of the year\n1 = Winter 2 = Spring 3 = Summer 4 = Autumn\n\n\n\n\n\nData Analysis\n\nStratify the daily mortality data into 4 groups by season.\n\n\n\nClick to show or hide code\n\n\nlibrary(tidyverse)\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.1.3     ✔ readr     2.1.4\n✔ forcats   1.0.0     ✔ stringr   1.5.0\n✔ ggplot2   3.4.3     ✔ tibble    3.2.1\n✔ lubridate 1.9.2     ✔ tidyr     1.3.0\n✔ purrr     1.0.2     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors\n\nbalt621 <- read_csv(\"balt621.csv\")\n\nRows: 6940 Columns: 5\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr (2): date, season\ndbl (3): death, pm10, tempf\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\nbalt621 %>% \n  group_by(season) %>% \n  summarize(n_pm10 = sum(!is.na(pm10)), mean_pm10 = mean(pm10, na.rm=TRUE),                 n_mortality = sum(!is.na(death)), mean_mortality = mean(death))\n\n# A tibble: 4 × 5\n  season n_pm10 mean_pm10 n_mortality mean_mortality\n  <chr>   <int>     <dbl>       <int>          <dbl>\n1 Autumn    559    -2.97         1748           19.2\n2 Spring    563     0.740        1729           18.2\n3 Summer    571     4.58         1748           17.7\n4 Winter    551    -2.93         1715           20.8"
+  },
+  {
+    "objectID": "Example Analysis.html#section",
+    "href": "Example Analysis.html#section",
+    "title": "Example Analysis",
+    "section": "",
+    "text": "season\nn_pm10\nmean_pm10\nn_mortality\nmean_mortality\n\n\n\n\nAutumn\n559\n-2.97\n1748\n19.2\n\n\nSpring\n563\n0.740\n1729\n18.2\n\n\nSummer\n571\n4.58\n1748\n17.7\n\n\nWinter\n551\n-2.93\n1715\n20.8"
+  },
+  {
+    "objectID": "Example Analysis.html#research-question",
+    "href": "Example Analysis.html#research-question",
+    "title": "Example Analysis",
+    "section": "Research Question",
+    "text": "Research Question\nIn investigating whether particulate air pollution levels as measured by TSP are associated with mortality, it is important to control for seasonal variations that might reflect the effects of weather on mortality, rather than particulate pollution levels.\nIn this project, I will use daily data from the city of Baltimore for the period 1987-2005, including the mortality count, median PM10 level, and season, to investigate whether or not particulate air pollution is associated with mortality, having controlled for seasonal effects."
+  },
+  {
+    "objectID": "Example Analysis.html#referneces",
+    "href": "Example Analysis.html#referneces",
+    "title": "Example Analysis",
+    "section": "Referneces",
+    "text": "Referneces\n\nPeng RD, Dominici F, Paster-Barriuso R, Zeger SL, Samet JM: Seasonal analysis of air pollution and mortality in 100 U.S. cities. American Journal of Epidemiology 16(6): 585-594, 2005.\nDominici F, McDermott A, Daniels M, Zeger SL, Samet JM. Revised analyses of the National Morbidity, Mortality, and Air Pollution Study: mortality among residents of 90 cities. J Toxicol Environ Health A. 2005 Jul 9-23;68(13-14):1071-92. doi: 10.1080/15287390590935932. PMID: 16024489.\nIzzotti A, Spatera P, Khalid Z, Pulliero A. Importance of Punctual Monitoring to Evaluate the Health Effects of Airborne Particulate Matter. Int J Environ Res Public Health. 2022 Aug 25;19(17):10587. doi: 10.3390/ijerph191710587. PMID: 36078301; PMCID: PMC9518414."
+  }
+]
